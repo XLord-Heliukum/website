@@ -93,10 +93,11 @@ export const site = {
     username: 'XLord-Heliukum',
     // 聚合哪些组织，数组顺序就是页面上的顺序
     orgs: [
-      'CodeHub-develop',
+      'Hub-develop',
+      'Hub-code-develop',
+      'Hub-ai-develop'
       'Open-code-Studio',
       'lively-Studio',
-      'Open-code-Studio-game',
       'Lite-Flash-Studio',
       'CODEOS-dev',
     ],
