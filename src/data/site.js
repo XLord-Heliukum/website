@@ -60,7 +60,7 @@ export const site = {
   /* ---------- 5. 社交链接 ---------- */
   // url 留空字符串 = 该项不显示，填上就自动出现
   socials: [
-    { name: 'GitHub', icon: icons.github, url: 'https://github.com/X-CODER-ocs', color: '#ffffff' },
+    { name: 'GitHub', icon: icons.github, url: 'https://github.com/XLord-Heliukum/', color: '#ffffff' },
     { name: 'Bilibili', icon: icons.bilibili, url: '', color: '#00aeec' },
     { name: 'Email', icon: icons.mail, url: '', color: '#f47060' },
     { name: 'QQ', icon: icons.qq, url: QQ_LINK, color: '#db9807' },
@@ -90,7 +90,7 @@ export const site = {
   // 展示哪些组织、每个组织放几个，改下面这块就行。
   showWork: true,
   github: {
-    username: 'X-CODER-ocs',
+    username: 'XLord-Heliukum',
     // 聚合哪些组织，数组顺序就是页面上的顺序
     orgs: [
       'CodeHub-develop',
