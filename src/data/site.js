@@ -95,7 +95,7 @@ export const site = {
     orgs: [
       'Hub-develop',
       'Hub-code-develop',
-      'Hub-ai-develop'
+      'Hub-ai-develop',
       'Open-code-Studio',
       'lively-Studio',
       'Lite-Flash-Studio',
