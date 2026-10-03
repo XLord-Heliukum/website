@@ -61,6 +61,7 @@ export const site = {
   // url 留空字符串 = 该项不显示，填上就自动出现
   socials: [
     { name: 'GitHub', icon: icons.github, url: 'https://github.com/XLord-Heliukum/', color: '#ffffff' },
+    { name: 'Blog', icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M3.429 5.1v2.4c7.248 0 13.114 5.886 13.114 13.114h2.4C18.943 12.18 11.82 5.1 3.429 5.1zm0 4.8v2.395c4.016 0 7.257 3.24 7.257 7.257h2.395c0-5.292-4.32-9.552-9.652-9.652zM6.171 16.8a1.714 1.714 0 1 0 0 3.429 1.714 1.714 0 0 0 0-3.429z"/></svg>', url: 'https://xlord-heliukum.github.io/blog/', color: '#4AA26F' },
     { name: 'Bilibili', icon: icons.bilibili, url: '', color: '#00aeec' },
     { name: 'Email', icon: icons.mail, url: '', color: '#f47060' },
     { name: 'QQ', icon: icons.qq, url: QQ_LINK, color: '#db9807' },
@@ -115,7 +116,7 @@ export const site = {
       en: 'Crafted with passion and code.',
     },
     // 版权归属跳转链接
-    ownerUrl: 'https://github.com/X-CODER-ocs',
+    ownerUrl: 'https://github.com/XLord-Heliukum',
   },
 
   /* ---------- 9. 按钮文案 ---------- */
