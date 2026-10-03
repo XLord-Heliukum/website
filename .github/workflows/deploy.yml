@@ -33,8 +33,117 @@ jobs:
       - name: 跑测试
         run: npm test
 
-      - name: 构建
+      - name: 构建网站 (Vite -> dist)
         run: npm run build
+
+      # ───────────── 嵌入博客到 /blog ─────────────
+      # GitHub Pages 一个自定义域名只能绑一个仓库，因此博客必须作为子目录
+      # 出现在本仓库的 Pages 产物里（dist/blog/），才能以 xlord.hub-develop.top/blog 访问。
+
+      - name: Checkout blog (文章/图片/验证文件)
+        uses: actions/checkout@v4
+        with:
+          repository: XLord-Heliukum/blog
+          path: blog
+
+      - name: Checkout FluentNext 前端 (Blazor WASM)
+        uses: actions/checkout@v4
+        with:
+          repository: XLord-Heliukum/fluentnext-frontend
+          path: fluentnext-src
+
+      - name: Checkout FluentNext 后端 (.NET 生成器)
+        uses: actions/checkout@v4
+        with:
+          repository: XLord-Heliukum/fluentnext-backend
+          path: fluentnext-backend
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      # 后端：读 Markdown -> 产 content.json / atom.xml / sitemap.xml / search.xml + 拷 images
+      - name: 后端生成器 -> blog-build
+        run: |
+          set -e
+          dotnet run -c Release --project fluentnext-backend -- \
+            --input blog/source/_posts \
+            --images blog/source/images \
+            --site fluentnext-backend/site.json \
+            --output blog-build
+          echo "后端产物:"; ls -la blog-build
+          echo "文章数:"; grep -o '"slug"' blog-build/api/content.json | wc -l
+
+      # 前端：构建 Blazor WASM
+      - name: 构建 FluentNext 前端 (dotnet publish)
+        run: dotnet publish fluentnext-src/FluentNext.Frontend.csproj -c Release -o .fn-dist
+
+      # GitHub Pages 子路径 /blog/：<base href="/"> -> /blog/
+      - name: Rewrite base href to /blog/
+        run: |
+          sed -i 's#<base href="/" />#<base href="/blog/" />#' .fn-dist/wwwroot/index.html
+          echo "base href -> $(grep -o '<base href="[^"]*"' .fn-dist/wwwroot/index.html)"
+
+      # .NET 发布把 blazor.webassembly.js 指纹化为哈希文件名，改写引导脚本指向真实文件
+      - name: Fix Blazor boot script fingerprint
+        run: |
+          HASHED=$(ls .fn-dist/wwwroot/_framework/blazor.webassembly.*.js 2>/dev/null | head -1 | xargs -n1 basename)
+          if [ -z "$HASHED" ]; then
+            echo "::error::找不到 blazor.webassembly.*.js，发布产物异常"
+            exit 1
+          fi
+          sed -i "s#src=\"_framework/blazor.webassembly.js\"#src=\"_framework/$HASHED\"#" .fn-dist/wwwroot/index.html
+          echo "boot script -> _framework/$HASHED"
+
+      # 合并前端到 blog-build（排除 /api：保留后端生成的真 content.json，绝不用 sed 改 _framework/*.js）
+      - name: 合并前端到 blog-build
+        shell: bash
+        run: |
+          set -e
+          rsync -a --exclude='/api' .fn-dist/wwwroot/ blog-build/
+          : > blog-build/.nojekyll
+
+      # 搜索引擎验证文件（官方要求永久保留）
+      - name: 拷贝搜索引擎验证文件
+        shell: bash
+        run: |
+          set -e
+          shopt -s nullglob
+          for f in blog/source/BingSiteAuth.xml blog/source/google*.html blog/source/baidu_verify_*.html; do
+            cp "$f" blog-build/ 2>/dev/null || true
+          done
+          ls blog-build | grep -iE 'BingSiteAuth|google|baidu' || echo "(无验证文件，跳过)"
+
+      # 把整包博客塞进 dist/blog/
+      - name: 嵌入到 dist/blog
+        run: |
+          set -e
+          mkdir -p dist/blog
+          rsync -a blog-build/ dist/blog/
+          : > dist/.nojekyll
+          echo "dist/blog 大小:"; du -sh dist/blog
+
+      # 根 404 兜底：/blog/* 深链刷新回退到 /blog/（站内点击跳转正常）
+      - name: 根 404 兜底 (/blog/* -> /blog/)
+        run: |
+          cat > dist/404.html <<'HTML'
+          <!doctype html>
+          <html lang="zh-CN">
+          <head><meta charset="utf-8"><title>404 - XLord</title>
+          <script>
+            try {
+              if (location.pathname.startsWith('/blog/')) { location.replace('/blog/'); }
+            } catch (e) {}
+          </script>
+          </head>
+          <body style="font-family:sans-serif;text-align:center;margin-top:20vh">
+            <h1>404</h1>
+            <p>页面不存在。<a href="/">返回首页</a> · <a href="/blog/">前往博客</a></p>
+          </body>
+          </html>
+          HTML
+          echo "根 404.html 已写入"
 
       - uses: actions/upload-pages-artifact@v3
         with:
