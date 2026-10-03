@@ -1,6 +1,6 @@
 # cangjie-site
 
-个人主页。视觉语言参照 [tiouo.cc](https://tiouo.cc) 重建，但换成了**正经的 Vue 3 + Vite 源码工程**——原站只能拿到压缩混淆过的构建产物，改不动。
+个人主页。视觉语言参照 [tiouo.cc](https://tiouo.cc) 重建，使用了**正经的 Vue 3 + Vite 源码工程**。
 
 ## 快速开始
 
