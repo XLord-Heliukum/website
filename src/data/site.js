@@ -16,64 +16,51 @@ const QQ_LINK = 'https://qm.qq.com/q/Jjjl1fH1OE'
 export const site = {
   /* ---------- 1. 身份（语言无关） ---------- */
 
-  name: 'xLord_cangjie',
-  // 页脚超大水印用的短名，会用 24vw 字号撑满屏幕宽度，别超过 6 个字符
-  watermark: 'xLord',
-  // 终端提示符 xlord@cangjie
-  user: 'xlord',
-  host: 'cangjie',
+  handle: 'xLord_cangjie',
+  // 页脚/签名用的短名
+  shortName: 'xLord',
 
-  /* ---------- 2. 首屏终端文案 ---------- */
-
-  terminal: {
-    // 命令本身不翻译，保持 whoami 才有终端味
-    command: 'whoami',
-    output: 'XLord_cangjie',
+  /* ---------- 2. 首屏 Hero ---------- */
+  hero: {
+    // 名字上方的小标签（等宽风）
+    eyebrow: { zh: 'XLORD · HELIUKUM', en: 'XLORD · HELIUKUM' },
+    // 主标题（大号）
+    name: 'XLord·Heliukum',
+    // 副标题 / 身份标签（多语言数组，会并列展示）
     roles: {
       zh: ['全栈开发', '开源共建者'],
       en: ['Full-stack Developer', 'Open Source Builder'],
     },
-    // 左边竖线那段引言
+    // 一句引言
     motto: {
       zh: '迎着所有不确定，勇往直前。',
       en: 'Forge ahead bravely against all uncertainties.',
     },
-    // 最后一行 // 开头的碎碎念，留空则不显示
-    status: {
-      zh: '做真正跑得起来的东西。',
-      en: 'Building things that actually work.',
-    },
   },
 
   /* ---------- 3. 头像 ---------- */
-  // 换头像：把新照片覆盖 public/avatar.png，然后跑 `npm run pixels`
-  // 这张是脚本抠完背景、裁到主体的版本，窄屏的圆形头像用它；
-  // 宽屏那个像素画走的是 src/data/pixels.js 里的矩阵，不用管这里
+  // 换头像：覆盖 public/avatar-cutout.png 即可
   avatar: './avatar-cutout.png',
 
   /* ---------- 4. 联系方式 ---------- */
-  // 点 Contact / Get in Touch 直接打开这个链接
   contact: {
     url: QQ_LINK,
+    label: { zh: '联系我', en: 'Get in Touch' },
   },
 
   /* ---------- 5. 社交链接 ---------- */
   // url 留空字符串 = 该项不显示，填上就自动出现
   socials: [
-    { name: 'GitHub', icon: icons.github, url: 'https://github.com/XLord-Heliukum/', color: '#ffffff' },
-    { name: 'Blog', icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M3.429 5.1v2.4c7.248 0 13.114 5.886 13.114 13.114h2.4C18.943 12.18 11.82 5.1 3.429 5.1zm0 4.8v2.395c4.016 0 7.257 3.24 7.257 7.257h2.395c0-5.292-4.32-9.552-9.652-9.652zM6.171 16.8a1.714 1.714 0 1 0 0 3.429 1.714 1.714 0 0 0 0-3.429z"/></svg>', url: 'https://xlord.hub-develop.top/blog/', color: '#4AA26F' },
+    { name: 'GitHub', icon: icons.github, url: 'https://github.com/XLord-Heliukum/', color: '#1f1e1d' },
+    { name: 'Blog', icon: icons.chat, url: 'https://xlord.hub-develop.top/blog/', color: '#1f6feb' },
     { name: 'Bilibili', icon: icons.bilibili, url: '', color: '#00aeec' },
     { name: 'Email', icon: icons.mail, url: '', color: '#f47060' },
     { name: 'QQ', icon: icons.qq, url: QQ_LINK, color: '#db9807' },
   ],
 
   /* ---------- 6. 关于区 ---------- */
-  // TODO 这两段是我按印象写的，换成你自己的话
   about: {
     title: { zh: '关于', en: 'About' },
-    workTitle: { zh: '项目', en: 'Projects' },
-    moreOnGithub: { zh: '在 GitHub 上看全部', en: 'See everything on GitHub' },
-    noDescription: { zh: '这个仓库还没写简介', en: 'No description yet' },
     paragraphs: {
       zh: [
         '我做跨平台应用和开发工具，主要围绕 .NET 生态和现代 Web 技术栈——比起代码写得多漂亮，我更在意它是不是真的能跑起来。',
@@ -86,45 +73,20 @@ export const site = {
     },
   },
 
-  /* ---------- 7. 项目（自动从 GitHub 拉，不用手写） ---------- */
-  // 仓库列表来自 src/data/github.json，由 `npm run fetch:github` 生成。
-  // 展示哪些组织、每个组织放几个，改下面这块就行。
-  showWork: true,
-  github: {
-    username: 'XLord-Heliukum',
-    // 聚合哪些组织，数组顺序就是页面上的顺序
-    orgs: [
-      'Hub-develop',
-      'Hub-code-develop',
-      'Hub-ai-develop',
-      'Open-code-Studio',
-      'lively-Studio',
-      'Lite-Flash-Studio',
-      'CODEOS-dev',
-    ],
-    // 每个组织最多展示几个（按最近更新排）
-    limitPerOrg: 25,
-    // 想从列表里剔掉的仓库名
-    skip: ['.github'],
-  },
-
-  /* ---------- 8. 页脚 ---------- */
-
+  /* ---------- 7. 页脚 ---------- */
   footer: {
     copyright: {
       zh: '用热爱和代码打造。',
       en: 'Crafted with passion and code.',
     },
-    // 版权归属跳转链接
     ownerUrl: 'https://github.com/XLord-Heliukum',
   },
 
-  /* ---------- 9. 按钮文案 ---------- */
-
+  /* ---------- 8. 按钮文案 ---------- */
   buttons: {
-    about: { zh: '关于', en: 'About' },
+    about: { zh: '关于我', en: 'About' },
+    projects: { zh: '项目', en: 'Projects' },
     contact: { zh: '联系我', en: 'Get in Touch' },
-    topbarContact: { zh: '联系', en: 'Contact' },
   },
 }
 

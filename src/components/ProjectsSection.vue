@@ -1,301 +1,141 @@
 <script setup>
-import { onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { projects } from '../data/projects.js'
 import { site } from '../data/site.js'
 import { t } from '../composables/useLocale.js'
-// 构建前由 tools/fetch-github.mjs 生成，别手改这个 json
-import github from '../data/github.json'
+import ProjectCard from './ProjectCard.vue'
+import ProjectDetail from './ProjectDetail.vue'
 
-/* 卡片滚进视口才淡入上移。直接在 mounted 里查 DOM ——
-   列表是构建期数据、挂载时已经渲染完，不需要用 ref 回调一个个收集 */
-let io = null
+const section = ref(null)
+const rail = ref(null)
+const railInner = ref(null)
+const selected = ref(null)
+
+let rafId = null
+
+function paint() {
+  if (!railInner.value || !rail.value || !section.value) return
+  // 窄屏用原生横向滚动，不做视差位移
+  if (window.innerWidth < 768) {
+    railInner.value.style.transform = 'translateX(0)'
+    return
+  }
+  const max = Math.max(0, railInner.value.scrollWidth - rail.value.clientWidth)
+  const rect = section.value.getBoundingClientRect()
+  const vh = window.innerHeight
+  // 0 → 1：section 从进入视口到底部离开
+  const p = Math.min(1, Math.max(0, (vh - rect.top) / (rect.height + vh)))
+  railInner.value.style.transform = `translateX(${-p * max}px)`
+}
+
+function onScroll() {
+  if (rafId) cancelAnimationFrame(rafId)
+  rafId = requestAnimationFrame(paint)
+}
 
 onMounted(() => {
-  const cards = document.querySelectorAll('.project-card')
-  if (!cards.length) return
-
-  io = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('animate-in')
-          io.unobserve(entry.target)
-        }
-      })
-    },
-    { threshold: 0.1 },
-  )
-
-  cards.forEach((el) => io.observe(el))
+  window.addEventListener('scroll', onScroll, { passive: true })
+  window.addEventListener('resize', onScroll)
+  paint()
 })
 
 onUnmounted(() => {
-  io?.disconnect()
+  window.removeEventListener('scroll', onScroll)
+  window.removeEventListener('resize', onScroll)
+  if (rafId) cancelAnimationFrame(rafId)
 })
 
-/** 把 ISO 时间转成「3 天前」这种，跟着语言走 */
-function updatedAgo(iso) {
-  if (!iso) return ''
-  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000)
-  if (days <= 0) return t({ zh: '今天更新', en: 'updated today' })
-  if (days < 30) return t({ zh: `${days} 天前更新`, en: `${days}d ago` })
-  const months = Math.floor(days / 30)
-  if (months < 12) return t({ zh: `${months} 个月前更新`, en: `${months}mo ago` })
-  return t({ zh: `${Math.floor(months / 12)} 年前更新`, en: `${Math.floor(months / 12)}y ago` })
+function open(project) {
+  selected.value = project
+  document.documentElement.style.overflow = 'hidden'
 }
-
-/** 语言 tag：有 GitHub 官方配色就用，没有就灰色 */
-function langStyle(rgb) {
-  if (!rgb) return {}
-  const c = rgb.join(',')
-  return { color: `rgb(${c})`, backgroundColor: `rgba(${c}, 0.14)` }
+function close() {
+  selected.value = null
+  document.documentElement.style.overflow = ''
 }
 </script>
 
 <template>
-  <section id="about" class="about">
-    <h2 class="section-title">{{ t(site.about.title) }}</h2>
-    <div class="intro">
-      <p v-for="p in t(site.about.paragraphs)" :key="p">{{ p }}</p>
+  <section id="projects" ref="section" class="projects container">
+    <p class="eyebrow">02 — {{ t(site.buttons.projects) }}</p>
+    <h2 class="section-title">{{ t({ zh: '我做过的一些东西', en: "Some things I've built" }) }}</h2>
+
+    <div ref="rail" class="rail">
+      <div ref="railInner" class="rail-inner">
+        <ProjectCard
+          v-for="p in projects"
+          :key="p.slug"
+          :project="p"
+          @open="open"
+        />
+      </div>
     </div>
 
-    <template v-if="site.showWork && github.orgs.length">
-      <h2 id="work" class="section-title">{{ t(site.about.workTitle) }}</h2>
+    <p class="hint">{{ t({ zh: '横向滑动查看更多', en: 'Swipe or scroll to explore' }) }}</p>
 
-      <div v-for="org in github.orgs" :key="org.login" class="org">
-        <a class="org-head" :href="org.url" target="_blank" rel="noopener noreferrer">
-          <img class="org-avatar" :src="org.avatar" :alt="org.login" loading="lazy" />
-          <span class="org-name">{{ org.name }}</span>
-          <span class="org-count">{{ org.repoCount }}</span>
-        </a>
-
-        <div class="project-grid">
-          <a
-            v-for="repo in org.repos"
-            :key="repo.name"
-            class="project-card"
-            :href="repo.url"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h3 class="project-name">
-              {{ repo.name }}
-              <span class="arrow">→</span>
-            </h3>
-            <p class="project-desc">
-              {{ repo.description || t(site.about.noDescription) }}
-            </p>
-            <div class="tags">
-              <span v-if="repo.language" class="tag" :style="langStyle(repo.color)">
-                {{ repo.language }}
-              </span>
-              <span class="tag tag-dim">{{ updatedAgo(repo.updated) }}</span>
-            </div>
-          </a>
-        </div>
-      </div>
-
-      <p class="more">
-        <a
-          :href="`https://github.com/${site.github.username}`"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {{ t(site.about.moreOnGithub) }} →
-        </a>
-      </p>
-    </template>
+    <ProjectDetail v-if="selected" :project="selected" @dismiss="close" />
   </section>
 </template>
 
 <style scoped>
-.about {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px 140px;
+.projects {
+  padding: 120px 0 120px;
 }
 
-.section-title {
-  font-size: 36px;
-  margin-top: 64px;
-  margin-bottom: 28px;
-  color: #fff;
-}
-
-.intro {
-  max-width: 760px;
-  line-height: 1.75;
-  color: #ffffffb3;
-}
-
-.intro p + p {
-  margin-top: 0.9rem;
-}
-
-/* ── 组织分组 ── */
-.org + .org {
-  margin-top: 44px;
-}
-
-.org-head {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
+.eyebrow {
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.16em;
+  color: var(--accent);
   margin-bottom: 16px;
-  padding: 6px 14px 6px 6px;
-  border-radius: 999px;
-  background: #ffffff14;
-  transition: background-color 0.25s ease;
+}
+.section-title {
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin-bottom: 40px;
 }
 
-.org-head:hover {
-  background: #ffffff26;
+/* 横向轨道：窄屏原生横滑，宽屏靠视差位移 */
+.rail {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+.rail::-webkit-scrollbar {
+  display: none;
+}
+.rail-inner {
+  display: inline-flex;
+  gap: 22px;
+  padding-bottom: 8px;
+  will-change: transform;
 }
 
-.org-avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  object-fit: cover;
+.hint {
+  margin-top: 22px;
+  font-size: 0.85rem;
+  color: var(--text-faint);
 }
 
-.org-name {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #fff;
-}
-
-.org-count {
-  font-size: 0.75rem;
-  color: #ffffff80;
-  padding: 1px 8px;
-  border-radius: 999px;
-  background: #ffffff1a;
-}
-
-/* ── 仓库卡片 ── */
-.project-grid {
-  display: grid;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-  gap: 18px;
-}
-
-.project-card {
-  display: block;
-  padding: 20px 22px;
-  border-radius: 12px;
-  background-color: #ffffff1a;
-  color: #fff;
-  /* 收起来的状态，等 IntersectionObserver 加 .animate-in */
-  opacity: 0;
-  transform: translateY(16px);
-  transition:
-    opacity 0.7s ease-out,
-    transform 0.7s ease-out,
-    background-color 0.3s ease;
-}
-
-.project-card.animate-in {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.project-card:hover {
-  background-color: #ffffff26;
-  transform: translateY(-4px);
-}
-
-.project-name {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 1.125rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-  word-break: break-word;
-}
-
-.arrow {
-  opacity: 0;
-  transform: translateX(-4px);
-  transition: all 0.25s ease;
-}
-
-.project-card:hover .arrow {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.project-desc {
-  font-size: 0.875rem;
-  line-height: 1.6;
-  color: #fff9;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 14px;
-}
-
-.tag {
-  display: inline-block;
-  padding: 3px 10px;
-  border-radius: 999px;
-  font-size: 0.75rem;
-}
-
-.tag-dim {
-  color: #ffffff80;
-  background-color: #ffffff14;
-}
-
-.more {
-  margin-top: 36px;
-  text-align: right;
-}
-
-.more a {
-  font-size: 0.9rem;
-  color: #ffffffb3;
-  border-bottom: 1px solid #ffffff40;
-  padding-bottom: 2px;
-  transition: color 0.25s ease;
-}
-
-.more a:hover {
-  color: #fff;
-  border-color: #fff;
+@media (max-width: 767px) {
+  .projects {
+    /* 容器在窄屏给轨道留满宽 */
+    width: 100%;
+    max-width: 100%;
+    padding-left: 5%;
+    padding-right: 5%;
+  }
+  .rail-inner {
+    gap: 16px;
+  }
 }
 
 @media (min-width: 768px) {
-  .project-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1200px) {
-  .project-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 648px) {
-  .section-title {
-    font-size: 28px;
-    margin-top: 44px;
-  }
-
-  .about {
-    padding-bottom: 90px;
-  }
-
-  .more {
-    text-align: left;
+  .rail {
+    overflow: hidden;
   }
 }
 </style>

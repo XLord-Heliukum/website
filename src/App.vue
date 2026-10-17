@@ -1,21 +1,21 @@
 <script setup>
 import LayoutView from './components/LayoutView.vue'
-import HeaderView from './components/HeaderView.vue'
+import HeroView from './components/HeroView.vue'
+import AboutView from './components/AboutView.vue'
 import ProjectsSection from './components/ProjectsSection.vue'
 </script>
 
 <template>
-  <div class="root">
-    <LayoutView>
-      <HeaderView />
-      <ProjectsSection />
-    </LayoutView>
-  </div>
+  <LayoutView>
+    <HeroView />
+    <AboutView />
+    <ProjectsSection />
+  </LayoutView>
 </template>
 
-<style scoped>
-.root {
-  width: 100%;
-  min-height: 100vh;
+<style>
+html,
+body {
+  margin: 0;
 }
 </style>
