@@ -50,7 +50,7 @@ const show = computed(() => true)
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: rgba(20, 20, 20, 0.35);
+  background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   overflow-y: auto;

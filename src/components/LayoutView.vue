@@ -1,6 +1,5 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import FooterView from './FooterView.vue'
 import { icons } from '../data/icons.js'
 
 const scrollRatio = ref(0)
@@ -28,13 +27,12 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div id="top" class="layout">
-    <div class="layout-content">
-      <slot />
-      <FooterView />
-    </div>
+    <div id="top" class="layout">
+      <div class="layout-content">
+        <slot />
+      </div>
 
-    <button class="to-top" :class="{ show: scrollRatio >= 1 }" @click="toTop" aria-label="回到顶部">
+      <button class="to-top" :class="{ show: scrollRatio >= 1 }" @click="toTop" aria-label="回到顶部">
       <span class="ico" v-html="icons.arrowUp"></span>
     </button>
   </div>

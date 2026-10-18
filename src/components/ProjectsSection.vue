@@ -23,8 +23,12 @@ function paint() {
   const max = Math.max(0, railInner.value.scrollWidth - rail.value.clientWidth)
   const rect = section.value.getBoundingClientRect()
   const vh = window.innerHeight
-  // 0 → 1：section 从进入视口到底部离开
-  const p = Math.min(1, Math.max(0, (vh - rect.top) / (rect.height + vh)))
+  // 视差窗口：section 顶部从「刚进入视口底部」(rect.top=vh) 到「接近视口顶部」
+  // (rect.top≈0.12vh) 的过程中，轨道从起点平移到终点。这样当 section 仍舒适可见时，
+  // 所有卡片就已完整显示，之后继续滚动轨道保持静止，不再提前截断内容。
+  const start = vh
+  const end = vh * 0.12
+  const p = Math.min(1, Math.max(0, (start - rect.top) / (start - end)))
   railInner.value.style.transform = `translateX(${-p * max}px)`
 }
 

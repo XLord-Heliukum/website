@@ -1,5 +1,5 @@
 /* ============================================================
-   全局样式 —— 浅色极简，移植自 hyliu.me 的设计语言
+   全局样式 —— 深色极简，移植自 hyliu.me 的设计语言
    保留阿里妈妈方圆体（用户指定字体）
    ============================================================ */
 
@@ -12,18 +12,18 @@
 }
 
 :root {
-  /* 配色：暖近白底 + Fluent 灰字 + 一个克制的蓝色强调 */
-  --bg: #faf9f8;
-  --bg-alt: #f3f2f0;
-  --text: #1f1e1d;
-  --text-muted: #605e5c;
-  --text-faint: #8a8886;
-  --line: #e7e5e3;
-  --card: #ffffff;
-  --accent: #1f6feb;
-  --accent-soft: #eaf1fe;
-  --shadow-sm: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.06);
-  --shadow: 0 0.25rem 1.5rem rgba(0, 0, 0, 0.08);
+  /* 配色：近黑底 + 柔和亮字 + 一个克制的亮蓝强调（深色极简） */
+  --bg: #15161a;
+  --bg-alt: #1c1d22;
+  --text: #ededed;
+  --text-muted: #a7a5a1;
+  --text-faint: #6e6d6b;
+  --line: #2a2b31;
+  --card: #1e1f25;
+  --accent: #4c9bff;
+  --accent-soft: rgba(76, 155, 255, 0.14);
+  --shadow-sm: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.45);
+  --shadow: 0 0.25rem 1.5rem rgba(0, 0, 0, 0.55);
   --radius: 14px;
   --radius-lg: 20px;
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
@@ -104,7 +104,7 @@ img {
   height: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #d8d6d3;
+  background: #3a3b42;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-track {
