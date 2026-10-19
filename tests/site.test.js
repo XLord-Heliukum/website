@@ -1,17 +1,19 @@
 /**
- * 极简核心页冒烟测试。
+ * 站点冒烟测试（hyliu 风格重写后）。
  *
  * 运行：npm test
  *
  * 覆盖：
- *  - 中央渲染出站点名 XLord·Heliukum 与标语
- *  - 左下角悬浮球默认收起（面板不渲染）
- *  - 点击悬浮球展开后，渲染出全部子域名链接且指向正确地址
+ *  - 首屏 Hero 渲染出姓名与联系链接
+ *  - 中英切换跟着 t() 走
+ *  - 项目区按数据渲染出对应数量的卡片，且点击能打开详情 modal
  */
 import { describe, it, expect, afterEach } from 'vitest'
 import { createApp, nextTick } from 'vue'
-import CoreView from '../src/components/CoreView.vue'
-import { site } from '../src/data/site.js'
+import HeroView from '../src/components/HeroView.vue'
+import ProjectsSection from '../src/components/ProjectsSection.vue'
+import { projects } from '../src/data/projects.js'
+import { setLocale } from '../src/composables/useLocale.js'
 
 let mounted = []
 
@@ -37,44 +39,49 @@ afterEach(() => {
   mounted = []
 })
 
-describe('极简核心页', () => {
+describe('首屏 Hero', () => {
   it('渲染出站点名 XLord·Heliukum', () => {
-    const { root } = mount(CoreView)
+    const { root } = mount(HeroView)
     expect(root.textContent).toContain('XLord·Heliukum')
   })
 
-  it('渲染出标语', () => {
-    const { root } = mount(CoreView)
-    expect(root.textContent).toContain(site.coreTagline)
+  it('联系按钮指向 QQ 短链并新标签页打开', () => {
+    const { root } = mount(HeroView)
+    const link = [...root.querySelectorAll('a[href]')].find((a) =>
+      (a.getAttribute('href') || '').includes('qm.qq.com'),
+    )
+    expect(link).toBeTruthy()
+    expect(link.getAttribute('target')).toBe('_blank')
   })
 
-  it('悬浮球默认收起，面板不渲染', () => {
-    const { root } = mount(CoreView)
-    const fab = root.querySelector('.fab')
-    expect(fab).not.toBeNull()
-    expect(fab.classList.contains('open')).toBe(false)
-    expect(root.querySelector('.fab-panel')).toBeNull()
+  it('语言切换：英文显示 Full-stack Developer，中文显示 全栈开发', async () => {
+    setLocale('en')
+    const en = mount(HeroView)
+    expect(en.root.textContent).toContain('Full-stack Developer')
+
+    setLocale('zh')
+    const zh = mount(HeroView)
+    expect(zh.root.textContent).toContain('全栈开发')
+    expect(zh.root.textContent).not.toContain('Full-stack Developer')
+  })
+})
+
+describe('项目区', () => {
+  it(`按数据渲染出 ${projects.length} 张卡片`, () => {
+    const { root } = mount(ProjectsSection)
+    expect(root.querySelectorAll('.card')).toHaveLength(projects.length)
   })
 
-  it('点击悬浮球展开后显示全部子域名链接', async () => {
-    const { root } = mount(CoreView)
-    const btn = root.querySelector('.fab-btn')
-    expect(btn).not.toBeNull()
+  it('点击卡片打开详情 modal', async () => {
+    const { root } = mount(ProjectsSection)
+    const card = root.querySelector('.card')
+    expect(card).not.toBeNull()
 
-    btn.dispatchEvent(new window.MouseEvent('click', { bubbles: true }))
+    card.dispatchEvent(new window.MouseEvent('click', { bubbles: true }))
     await nextTick()
     await nextTick()
 
-    const panel = root.querySelector('.fab-panel')
-    expect(panel).not.toBeNull()
-
-    const links = [...panel.querySelectorAll('a')]
-    expect(links).toHaveLength(site.subdomains.length)
-
-    const hrefs = links.map((a) => a.getAttribute('href'))
-    site.subdomains.forEach((s) => expect(hrefs).toContain(s.url))
-
-    // 子域名链接都新标签页打开
-    links.forEach((a) => expect(a.getAttribute('target')).toBe('_blank'))
+    expect(root.querySelector('.overlay')).not.toBeNull()
+    expect(root.querySelector('.detail')).not.toBeNull()
   })
 })
