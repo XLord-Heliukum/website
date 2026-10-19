@@ -88,6 +88,15 @@ export const site = {
     projects: { zh: '项目', en: 'Projects' },
     contact: { zh: '联系我', en: 'Get in Touch' },
   },
+
+  /* ---------- 9. 极简核心页（xlord.hub-develop.top 主域） ---------- */
+  // 中央主显示标语（极简页只展示名字 + 这句）
+  coreTagline: '迎着所有不确定，勇往直前。',
+  // 左下角悬浮球里的子域名链接（组织 / 社区门户）
+  subdomains: [
+    { name: 'Hub-develop', url: 'https://hub-develop.top/', color: '#6feec2' },
+    { name: 'Code Hub', url: 'https://code.hub-develop.top/', color: '#2bbd86' },
+  ],
 }
 
 export default site

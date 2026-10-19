@@ -1,16 +1,9 @@
 <script setup>
-import LayoutView from './components/LayoutView.vue'
-import HeroView from './components/HeroView.vue'
-import AboutView from './components/AboutView.vue'
-import ProjectsSection from './components/ProjectsSection.vue'
+import CoreView from './components/CoreView.vue'
 </script>
 
 <template>
-  <LayoutView>
-    <HeroView />
-    <AboutView />
-    <ProjectsSection />
-  </LayoutView>
+  <CoreView />
 </template>
 
 <style>
